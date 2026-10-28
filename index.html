@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffe3ee">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Lumi Studio — Cílios & Sobrancelhas</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23e6177a'/><path d='M14 58 Q50 22 86 58 Q50 80 14 58Z' fill='white'/><circle cx='50' cy='56' r='11' fill='%23e6177a'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════ VARIÁVEIS ═══════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg:      #fff3f8;   /* rosa fraco (cor principal) */
+  --bg2:     #ffffff;
+  --bg3:     #ffe6f0;
+  --bg4:     #ffd3e5;
+  --text:    #3d1f2f;
+  --muted:   #8f6a7c;
+  --pink:    #e6177a;   /* rosa forte (detalhes) */
+  --pink2:   #be0f63;
+  --soft:    #ffc4dd;
+  --border:  #f6d2e1;
+  --green:   #17935a;
+  --green-bg:#e3f7ec;
+  --yellow:  #b87800;
+  --yellow-bg:#fff4d6;
+  --red:     #d3263c;
+  --red-bg:  #ffe3e7;
+  --radius:  14px;
+  --shadow:  0 8px 30px rgba(230, 23, 122, .10);
+  --trans:   all .2s cubic-bezier(.4,0,.2,1);
+  --serif:   'Playfair Display', Georgia, serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--bg);
+  background-image: radial-gradient(900px 400px at 85% -10%, rgba(255,196,221,.55), transparent 60%),
+                    radial-gradient(700px 380px at -10% 10%, rgba(255,214,230,.7), transparent 60%);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════ LOADER / TOAST ═══════════════ */
+#globalLoader {
+  position: fixed; inset: 0; background: rgba(255,243,248,.82); backdrop-filter: blur(5px);
+  z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+#globalLoader.show { opacity: 1; pointer-events: all; }
+.spinner { width: 44px; height: 44px; border: 4px solid var(--soft); border-top-color: var(--pink); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#globalLoader p { color: var(--muted); font-size: .9rem; font-weight: 500; }
+
+#toastContainer { position: fixed; top: 78px; right: 1rem; z-index: 8888; display: flex; flex-direction: column; gap: .5rem; max-width: 360px; width: calc(100vw - 2rem); }
+.toast {
+  padding: .85rem 1.1rem; border-radius: 12px; font-size: .88rem; font-weight: 600;
+  box-shadow: var(--shadow); cursor: pointer; background: #fff; border: 1.5px solid var(--border);
+  animation: slideIn .3s cubic-bezier(.4,0,.2,1); display: flex; align-items: center; gap: .6rem;
+}
+.toast.success { border-color: var(--green); color: #0f6c40; }
+.toast.error   { border-color: var(--red);   color: #9d1428; }
+.toast.warning { border-color: #e0a100;      color: #7a5200; }
+.toast.info    { border-color: var(--pink);  color: var(--pink2); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+
+/* ═══════════════ HEADER ═══════════════ */
+.header {
+  background: rgba(255,255,255,.88); backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--pink);
+  padding: 0 1.2rem; height: 66px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100;
+}
+.header-inner { max-width: 1000px; margin: 0 auto; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.logo { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+.logo svg { width: 42px; height: 42px; flex-shrink: 0; filter: drop-shadow(0 3px 8px rgba(230,23,122,.3)); }
+.logo-text { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.logo-text em { color: var(--pink); font-style: italic; }
+.logo-sub { display: block; font-family: 'DM Sans', sans-serif; font-size: .62rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-top: -2px; }
+.user-info { display: flex; align-items: center; gap: .6rem; font-size: .88rem; color: var(--muted); }
+.user-name { font-weight: 600; color: var(--text); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ═══════════════ LAYOUT ═══════════════ */
+.container { max-width: 700px; margin: 1.8rem auto; padding: 0 1rem; }
+.screen { display: none; }
+.screen.active { display: block; animation: fadeUp .3s cubic-bezier(.4,0,.2,1); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.card {
+  background: var(--bg2); border-radius: 20px; padding: 1.9rem; margin-bottom: 1.4rem;
+  border: 1.5px solid var(--border); box-shadow: var(--shadow);
+}
+.card h2 { font-family: var(--serif); font-size: 1.75rem; font-weight: 600; color: var(--text); margin-bottom: 1.3rem; }
+.card h2::after { content: ''; display: block; width: 44px; height: 3px; border-radius: 3px; background: var(--pink); margin-top: .45rem; }
+.card-section { margin-bottom: 1.8rem; }
+.section-title {
+  font-size: .72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--pink); margin-bottom: .9rem; padding-bottom: .5rem; border-bottom: 1.5px dashed var(--border);
+}
+
+/* hero do login */
+.hero { text-align: center; padding: .5rem 0 1.4rem; }
+.hero .eye { width: 92px; height: 92px; margin: 0 auto .6rem; display: block; }
+.hero h1 { font-family: var(--serif); font-size: 2rem; font-weight: 600; line-height: 1.15; }
+.hero h1 em { color: var(--pink); }
+.hero p { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+
+/* ═══════════════ BOTÕES ═══════════════ */
+.btn {
+  padding: .7rem 1.3rem; border: none; border-radius: 12px; cursor: pointer;
+  font-family: inherit; font-size: .95rem; font-weight: 600; transition: var(--trans); min-height: 46px;
+  -webkit-tap-highlight-color: transparent; position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem; text-decoration: none;
+}
+.btn:active:not(:disabled) { transform: scale(.97); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: var(--pink); color: #fff; box-shadow: 0 6px 18px rgba(230,23,122,.28); }
+.btn-primary:hover:not(:disabled) { background: var(--pink2); box-shadow: 0 8px 22px rgba(230,23,122,.38); }
+.btn-secondary { background: var(--bg3); color: var(--pink2); border: 1.5px solid var(--soft); }
+.btn-secondary:hover:not(:disabled) { background: var(--bg4); }
+.btn-success { background: var(--green); color: #fff; }
+.btn-success:hover:not(:disabled) { filter: brightness(.93); }
+.btn-danger { background: #fff; color: var(--red); border: 1.5px solid #f3b6bf; }
+.btn-danger:hover:not(:disabled) { background: var(--red-bg); }
+.btn-sm { min-height: 36px; padding: .35rem .8rem; font-size: .82rem; border-radius: 10px; }
+.btn-full { width: 100%; margin-top: .8rem; }
+.btn-row { display: flex; gap: .7rem; flex-wrap: wrap; }
+.btn-link { background: none; border: none; color: var(--pink2); font-weight: 600; cursor: pointer; font-family: inherit; font-size: .85rem; text-decoration: underline; padding: .3rem; }
+.btn.loading { color: transparent !important; }
+.btn.loading::after { content: ''; position: absolute; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+.btn-secondary.loading::after { border-color: rgba(190,15,99,.25); border-top-color: var(--pink2); }
+
+/* ═══════════════ FORM ═══════════════ */
+.form-group { margin-bottom: 1.1rem; }
+.form-group label { display: block; margin-bottom: .35rem; color: var(--muted); font-size: .82rem; font-weight: 600; }
+.form-group input, .form-group select {
+  width: 100%; padding: .8rem 1rem; border: 1.5px solid var(--border); border-radius: 12px;
+  background: #fff; color: var(--text); font-family: inherit; font-size: 1rem; transition: var(--trans);
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 4px rgba(230,23,122,.12); }
+.form-hint { font-size: .76rem; color: var(--muted); margin-top: .3rem; }
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type=number] { -moz-appearance: textfield; }
+
+.alert { padding: .8rem 1rem; border-radius: 12px; margin-bottom: 1rem; font-size: .88rem; font-weight: 500; animation: fadeUp .2s ease; }
+.alert-success { background: var(--green-bg); color: #0f6c40; border: 1.5px solid #9edbbb; }
+.alert-error   { background: var(--red-bg);   color: #9d1428; border: 1.5px solid #f3b6bf; }
+.alert-warning { background: var(--yellow-bg);color: #7a5200; border: 1.5px solid #f0d28a; }
+.alert-info    { background: var(--bg3);      color: var(--pink2); border: 1.5px solid var(--soft); }
+
+/* abas */
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg3); border-radius: 14px; padding: 4px; margin-bottom: 1.3rem; }
+.auth-tabs button { border: none; background: transparent; padding: .65rem; border-radius: 11px; font-family: inherit; font-weight: 700; font-size: .92rem; color: var(--muted); cursor: pointer; transition: var(--trans); }
+.auth-tabs button.active { background: #fff; color: var(--pink2); box-shadow: 0 3px 10px rgba(230,23,122,.15); }
+.nav-tabs { display: flex; gap: .5rem; margin-bottom: 1.3rem; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.nav-tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: .62rem 1.1rem; background: #fff; border: 1.5px solid var(--border); border-radius: 999px; color: var(--muted);
+  cursor: pointer; font-family: inherit; font-size: .88rem; font-weight: 600; transition: var(--trans); min-height: 42px; white-space: nowrap;
+}
+.tab:hover { color: var(--pink2); border-color: var(--soft); }
+.tab.active { background: var(--pink); color: #fff; border-color: var(--pink); box-shadow: 0 5px 14px rgba(230,23,122,.28); }
+
+/* ═══════════════ CALENDÁRIO ═══════════════ */
+.month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; }
+.month-label { font-family: var(--serif); font-size: 1.3rem; font-weight: 600; }
+.month-label::first-letter { text-transform: uppercase; }
+.cal-head, .calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }
+.cal-head span { text-align: center; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding-bottom: .25rem; }
+.day-card {
+  aspect-ratio: 1; min-height: 38px; background: var(--bg); border: 2px solid transparent; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem;
+  cursor: pointer; transition: var(--trans); -webkit-tap-highlight-color: transparent;
+}
+.day-card:hover:not(.disabled):not(.blank) { border-color: var(--pink); background: var(--bg3); }
+.day-card.today { box-shadow: inset 0 0 0 2px var(--soft); }
+.day-card.selected, .day-card.selected:hover { background: var(--pink) !important; color: #fff; border-color: var(--pink); box-shadow: 0 5px 14px rgba(230,23,122,.3); }
+.day-card.disabled { opacity: .28; cursor: not-allowed; }
+.day-card.blank { visibility: hidden; cursor: default; }
+
+.time-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: .5rem; margin-top: .4rem; }
+.time-slot {
+  background: var(--bg); border: 2px solid transparent; border-radius: 12px; padding: .65rem .3rem; text-align: center; cursor: pointer;
+  font-weight: 700; font-size: .98rem; min-height: 46px; display: flex; align-items: center; justify-content: center; transition: var(--trans);
+}
+.time-slot:hover:not(.booked) { border-color: var(--pink); background: var(--bg3); }
+.time-slot.selected, .time-slot.selected:hover { background: var(--pink) !important; color: #fff; border-color: var(--pink); box-shadow: 0 5px 14px rgba(230,23,122,.3); }
+.time-slot.booked { opacity: .3; cursor: not-allowed; text-decoration: line-through; }
+
+/* ═══════════════ SERVIÇOS ═══════════════ */
+.services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .7rem; }
+.service-card {
+  background: var(--bg); border: 2px solid transparent; border-radius: 16px; padding: 1rem; cursor: pointer;
+  transition: var(--trans); display: flex; flex-direction: column; gap: .25rem;
+}
+.service-card:hover { border-color: var(--pink); background: var(--bg3); }
+.service-card.selected, .service-card.selected:hover { background: var(--pink); border-color: var(--pink); color: #fff; box-shadow: 0 8px 20px rgba(230,23,122,.32); }
+.svc-name { font-weight: 700; font-size: .95rem; line-height: 1.25; }
+.svc-dur { font-size: .76rem; color: var(--muted); }
+.svc-price { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; color: var(--pink); margin-top: .3rem; }
+.service-card.selected .svc-dur { color: rgba(255,255,255,.85); }
+.service-card.selected .svc-price { color: #fff; }
+
+/* ═══════════════ AGENDAMENTOS ═══════════════ */
+.appointments-list { display: grid; gap: .8rem; }
+.apt-card {
+  background: var(--bg); border-left: 5px solid var(--pink); border-radius: 14px; padding: 1rem 1.2rem;
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.apt-card.past { border-left-color: var(--border); opacity: .6; }
+.apt-card.dim  { border-left-color: #e0a100; background: #fffaf0; }
+.apt-info { flex: 1; min-width: 190px; }
+.apt-info h3 { font-size: 1rem; font-weight: 700; margin-bottom: .2rem; }
+.apt-info p { font-size: .84rem; color: var(--muted); margin-bottom: .1rem; }
+.apt-actions { display: flex; gap: .45rem; flex-wrap: wrap; }
+.badge { display: inline-block; padding: .18rem .65rem; border-radius: 999px; font-size: .72rem; font-weight: 700; margin-top: .4rem; margin-right: .3rem; }
+.badge-paid    { background: var(--green-bg); color: #0f6c40; }
+.badge-wait    { background: var(--yellow-bg); color: #7a5200; }
+.badge-local   { background: var(--bg4); color: var(--pink2); }
+.badge-refund  { background: #eceaf5; color: #4b3f8a; }
+.badge-admin   { background: var(--bg4); color: var(--pink2); }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-bottom: 1.2rem; }
+.stat { background: var(--bg3); border-radius: 14px; padding: .8rem 1rem; }
+.stat small { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: var(--muted); }
+.stat b { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--pink2); }
+
+/* ═══════════════ PAGAMENTO ═══════════════ */
+.pay-summary { background: var(--bg3); border-radius: 16px; padding: 1.1rem 1.2rem; margin-bottom: 1.4rem; border-left: 5px solid var(--pink); }
+.pay-row { display: flex; justify-content: space-between; gap: 1rem; padding: .3rem 0; font-size: .9rem; color: var(--muted); }
+.pay-row span:last-child { color: var(--text); font-weight: 600; text-align: right; }
+.pay-row.total { border-top: 1.5px dashed var(--soft); margin-top: .4rem; padding-top: .7rem; }
+.pay-row.total span { font-family: var(--serif); font-size: 1.4rem; color: var(--pink2) !important; }
+.pix-box { background: #fff; border: 2px dashed var(--pink); border-radius: 18px; padding: 1.4rem; text-align: center; margin: 1.1rem 0; }
+.pix-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+.method-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; margin: 1rem 0; }
+.method-opt { background: var(--bg); border: 2px solid var(--border); border-radius: 16px; padding: 1.1rem .5rem; cursor: pointer; text-align: center; transition: var(--trans); }
+.method-opt:hover { border-color: var(--pink); }
+.method-opt.selected { border-color: var(--pink); background: var(--bg3); box-shadow: 0 5px 16px rgba(230,23,122,.2); }
+.method-icon { font-size: 1.9rem; display: block; margin-bottom: .3rem; }
+.method-name { font-weight: 700; font-size: .88rem; }
+.secure-note { display: flex; gap: .5rem; align-items: center; font-size: .78rem; color: var(--muted); margin-top: 1rem; }
+
+/* ═══════════════ CONFIG ═══════════════ */
+.settings-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; }
+.checkbox-row { display: flex; flex-wrap: wrap; gap: .5rem; }
+.cb-item { display: flex; align-items: center; gap: .4rem; padding: .55rem .9rem; background: var(--bg); border: 1.5px solid var(--border); border-radius: 999px; cursor: pointer; font-size: .88rem; font-weight: 600; min-height: 42px; }
+.cb-item:has(input:checked) { background: var(--bg4); border-color: var(--pink); color: var(--pink2); }
+.cb-item input { accent-color: var(--pink); width: auto; }
+.svc-edit { display: grid; grid-template-columns: 1fr 90px 100px; gap: .5rem; width: 100%; }
+.svc-edit input, .svc-edit select { padding: .55rem .7rem; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: .9rem; width: 100%; background: #fff; color: var(--text); }
+.svc-edit input:focus, .svc-edit select:focus { outline: none; border-color: var(--pink); }
+
+.empty { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: .92rem; }
+.empty span { display: block; font-size: 2.3rem; margin-bottom: .4rem; }
+.footer { padding: 1.5rem; text-align: center; margin-top: 2rem; border-top: 1.5px solid var(--border); background: rgba(255,255,255,.6); }
+.footer p { color: var(--muted); font-size: .8rem; margin: .2rem 0; }
+.footer strong { color: var(--pink2); }
+
+@media (max-width: 600px) {
+  .card { padding: 1.25rem; border-radius: 18px; }
+  .card h2 { font-size: 1.5rem; }
+  .form-group input, .form-group select { font-size: 16px; }
+  .container { margin: 1rem auto; }
+  .logo-sub { display: none; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .svc-edit { grid-template-columns: 1fr 1fr; }
+  .svc-edit input:first-child { grid-column: 1 / -1; }
+  .method-options { gap: .45rem; }
+  #toastContainer { top: 72px; }
+}
+</style>
+</head>
+<body>
+
+<div id="globalLoader"><div class="spinner"></div><p id="loaderText">Carregando...</p></div>
+<div id="toastContainer"></div>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="18" fill="#e6177a"/>
+        <path d="M10 38 Q32 14 54 38 Q32 52 10 38Z" fill="#fff"/>
+        <circle cx="32" cy="36" r="8.5" fill="#e6177a"/><circle cx="29.5" cy="33.5" r="2.2" fill="#fff"/>
+        <g stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none">
+          <path d="M16 31 Q12 25 10 22"/><path d="M23 26 Q20 19 19 15"/><path d="M32 23 Q32 16 32 12"/>
+          <path d="M41 26 Q44 19 45 15"/><path d="M48 31 Q52 25 54 22"/>
+        </g>
+      </svg>
+      <div class="logo-text" id="brandName">Lumi <em>Studio</em><span class="logo-sub">Cílios & Sobrancelhas</span></div>
+    </div>
+    <div class="user-info" id="userInfo"></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ══════ FIREBASE NÃO CONFIGURADO ══════ -->
+  <div id="setupScreen" class="screen">
+    <div class="card">
+      <h2>Falta configurar o Firebase</h2>
+      <div class="alert alert-warning">Abra <strong>public/index.html</strong>, procure por <strong>FIREBASE_CONFIG</strong> e cole os dados do seu projeto Firebase (Configurações do projeto → Seus apps → Web). O passo a passo completo está no arquivo <strong>SETUP.md</strong>.</div>
+    </div>
+  </div>
+
+  <!-- ══════ LOGIN / CADASTRO ══════ -->
+  <div id="loginScreen" class="screen active">
+    <div class="card">
+      <div class="hero">
+        <svg class="eye" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M6 40 Q32 12 58 40 Q32 56 6 40Z" fill="#ffd3e5" stroke="#e6177a" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="32" cy="38" r="9.5" fill="#e6177a"/><circle cx="32" cy="38" r="4" fill="#3d1f2f"/><circle cx="28.5" cy="34.5" r="2.4" fill="#fff"/>
+          <g stroke="#e6177a" stroke-width="2.6" stroke-linecap="round" fill="none">
+            <path d="M12 33 Q7 27 5 23"/><path d="M19 27 Q15 20 14 15"/><path d="M27 23 Q25 15 25 10"/>
+            <path d="M37 23 Q39 15 39 10"/><path d="M45 27 Q49 20 50 15"/><path d="M52 33 Q57 27 59 23"/>
+          </g>
+        </svg>
+        <h1>Realce seu <em>olhar</em></h1>
+        <p>Agende cílios e sobrancelhas em poucos toques — pagamento seguro pelo Mercado Pago.</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabLogin" class="active" type="button">Entrar</button>
+        <button id="tabRegister" type="button">Criar conta</button>
+      </div>
+      <div id="loginAlert"></div>
+
+      <form id="authForm" novalidate>
+        <div class="form-group" id="gName" style="display:none;">
+          <label for="fName">Seu nome</label>
+          <input type="text" id="fName" placeholder="Maria Silva" autocomplete="name" maxlength="60">
+        </div>
+        <div class="form-group" id="gPhone" style="display:none;">
+          <label for="fPhone">WhatsApp (com DDD)</label>
+          <input type="tel" id="fPhone" placeholder="(11) 91234-5678" autocomplete="tel" maxlength="20">
+        </div>
+        <div class="form-group">
+          <label for="fEmail">E-mail</label>
+          <input type="email" id="fEmail" placeholder="voce@email.com" autocomplete="email" spellcheck="false">
+        </div>
+        <div class="form-group">
+          <label for="fPass">Senha</label>
+          <input type="password" id="fPass" placeholder="Mínimo 6 caracteres" autocomplete="current-password">
+        </div>
+        <button id="btnAuth" class="btn btn-primary btn-full" type="submit">Entrar</button>
+        <div style="text-align:center;margin-top:.6rem;"><button id="btnForgot" class="btn-link" type="button">Esqueci minha senha</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════ PAGAMENTO: MÉTODO ══════ -->
+  <div id="paymentScreen" class="screen">
+    <div class="card">
+      <h2>Pagamento</h2>
+      <div id="paymentAlert"></div>
+      <div class="pay-summary">
+        <div class="pay-row"><span>Serviço</span><span id="pServiceName">—</span></div>
+        <div class="pay-row"><span>Data</span><span id="pDate">—</span></div>
+        <div class="pay-row"><span>Horário</span><span id="pTime">—</span></div>
+        <div class="pay-row total"><span>Total</span><span id="pAmount">R$ 0</span></div>
+      </div>
+      <div class="section-title">Como prefere pagar?</div>
+      <div class="method-options" id="payMethodOptions">
+        <div class="method-opt selected" data-method="pix"><span class="method-icon">💸</span><div class="method-name">PIX</div></div>
+        <div class="method-opt" data-method="credit"><span class="method-icon">💳</span><div class="method-name">Crédito</div></div>
+        <div class="method-opt" data-method="debit"><span class="method-icon">🏦</span><div class="method-name">Débito</div></div>
+      </div>
+      <p class="secure-note">🔒 O horário fica reservado para você enquanto o pagamento é feito. Só é confirmado depois que o Mercado Pago aprova.</p>
+      <div class="btn-row" style="margin-top:1.3rem;">
+        <button id="btnGoPayStep" class="btn btn-primary" style="flex:1;">Continuar →</button>
+        <button id="btnCancelPayment" class="btn btn-secondary">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ PIX ══════ -->
+  <div id="pixScreen" class="screen">
+    <div class="card">
+      <h2>Pagar com PIX</h2>
+      <div id="pixAlert"></div>
+      <div class="pay-summary">
+        <div class="pay-row"><span>Serviço</span><span id="pixSvcName">—</span></div>
+        <div class="pay-row"><span>Quando</span><span id="pixDate">—</span></div>
+        <div class="pay-row total"><span>Total</span><span id="pixAmount">R$ 0</span></div>
+      </div>
+      <div id="pixBox" class="pix-box">
+        <div class="pix-label">Escaneie o QR Code</div>
+        <div id="qrCodeContainer" style="margin:1rem auto;width:fit-content;"></div>
+        <div id="pixTimer" style="font-size:.88rem;color:var(--yellow);font-weight:700;margin-bottom:.8rem;">Expira em --:--</div>
+        <div class="btn-row" style="justify-content:center;">
+          <button id="btnCopyPixCode" class="btn btn-secondary btn-sm">📋 Copiar código PIX (copia e cola)</button>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin-top:.9rem;line-height:1.6;">
+          Abra o app do seu banco, escaneie o QR ou cole o código.<br>
+          Seu horário é <strong style="color:var(--pink2);">confirmado automaticamente</strong> assim que o pagamento cair.
+        </p>
+        <div id="pixStatus" style="margin-top:.8rem;font-size:.86rem;color:var(--muted);">⏳ Aguardando pagamento...</div>
+      </div>
+      <div class="btn-row" style="margin-top:1rem;">
+        <button id="btnCheckPix" class="btn btn-primary" style="flex:1;">🔄 Já paguei — verificar</button>
+        <button id="btnCancelPix" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ CONFIRMAÇÃO ══════ -->
+  <div id="confirmScreen" class="screen"><div class="card" id="confirmCard"></div></div>
+
+  <!-- ══════ CLIENTE ══════ -->
+  <div id="clientScreen" class="screen">
+    <div class="nav-tabs">
+      <button class="tab active" data-tab="booking">✨ Agendar</button>
+      <button class="tab" data-tab="history">📋 Meus agendamentos</button>
+    </div>
+
+    <div id="bookingTab">
+      <div class="card">
+        <h2>Novo agendamento</h2>
+        <div class="card-section">
+          <div class="section-title">1 · Escolha o serviço</div>
+          <div class="services-grid" id="servicesList"></div>
+        </div>
+        <div class="card-section">
+          <div class="section-title">2 · Escolha o dia</div>
+          <div class="month-nav">
+            <span class="month-label" id="currentMonth"></span>
+            <div class="btn-row">
+              <button id="btnPrevMonth" class="btn btn-secondary btn-sm" aria-label="Mês anterior">←</button>
+              <button id="btnNextMonth" class="btn btn-secondary btn-sm" aria-label="Próximo mês">→</button>
+            </div>
+          </div>
+          <div class="cal-head"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
+          <div class="calendar" id="calendar"></div>
+        </div>
+        <div id="timeSlotsSection" style="display:none;">
+          <div class="section-title">3 · Escolha o horário</div>
+          <div class="time-slots" id="timeSlots"></div>
+        </div>
+        <button id="btnProceedPayment" class="btn btn-primary btn-full">Ir para o pagamento →</button>
+      </div>
+    </div>
+
+    <div id="historyTab" style="display:none;">
+      <div class="card">
+        <h2>Meus agendamentos</h2>
+        <div id="historyAlert"></div>
+        <div class="section-title">Próximos</div>
+        <div class="appointments-list" id="futureAppointments"></div>
+        <div class="section-title" style="margin-top:1.5rem;">Anteriores</div>
+        <div class="appointments-list" id="pastAppointments"></div>
+        <p class="form-hint" style="margin-top:1rem;">Cancelamentos com pagamento confirmado são aceitos até 24h antes e o valor é estornado automaticamente.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ ADMIN ══════ -->
+  <div id="adminScreen" class="screen">
+    <div class="nav-tabs">
+      <button class="tab active" data-atab="daily">📅 Dia</button>
+      <button class="tab" data-atab="monthly">📆 Mês</button>
+      <button class="tab" data-atab="book">➕ Agendar</button>
+      <button class="tab" data-atab="settings">⚙️ Configurações</button>
+    </div>
+
+    <div id="dailyTab">
+      <div class="card">
+        <h2>Agenda do dia</h2>
+        <div class="form-group"><label for="adminDaySelect">Dia</label><input type="date" id="adminDaySelect"></div>
+        <div class="stats" id="dailyStats"></div>
+        <div class="appointments-list" id="dailyAppointments"></div>
+      </div>
+    </div>
+
+    <div id="monthlyTab" style="display:none;">
+      <div class="card">
+        <h2>Agenda do mês</h2>
+        <div class="month-nav">
+          <span class="month-label" id="adminCurrentMonth"></span>
+          <div class="btn-row">
+            <button id="btnAdminPrev" class="btn btn-secondary btn-sm">←</button>
+            <button id="btnAdminNext" class="btn btn-secondary btn-sm">→</button>
+          </div>
+        </div>
+        <div class="stats" id="monthlyStats"></div>
+        <div class="appointments-list" id="monthlyAppointments"></div>
+      </div>
+    </div>
+
+    <div id="bookTab" style="display:none;">
+      <div class="card">
+        <h2>Agendar para cliente</h2>
+        <div class="form-group"><label for="aClientName">Nome da cliente</label><input type="text" id="aClientName" placeholder="Nome completo" maxlength="60"></div>
+        <div class="form-group"><label for="aClientPhone">WhatsApp (opcional)</label><input type="tel" id="aClientPhone" placeholder="(11) 91234-5678" maxlength="20"></div>
+        <div class="card-section">
+          <div class="section-title">Serviço</div>
+          <div class="services-grid" id="aServicesList"></div>
+        </div>
+        <div class="card-section">
+          <div class="month-nav">
+            <span class="month-label" id="aMonth"></span>
+            <div class="btn-row">
+              <button id="aPrev" class="btn btn-secondary btn-sm">←</button>
+              <button id="aNext" class="btn btn-secondary btn-sm">→</button>
+            </div>
+          </div>
+          <div class="cal-head"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
+          <div class="calendar" id="aCalendar"></div>
+        </div>
+        <div id="aSlotsSection" style="display:none;">
+          <div class="section-title">Horário</div>
+          <div class="time-slots" id="aSlots"></div>
+        </div>
+        <label class="cb-item" style="margin-top:1.2rem;"><input type="checkbox" id="aPaid"> Já recebi o pagamento (no local)</label>
+        <button id="btnAdminBook" class="btn btn-primary btn-full">✅ Confirmar agendamento</button>
+      </div>
+    </div>
+
+    <div id="settingsTab" style="display:none;">
+      <div class="card">
+        <h2>Configurações</h2>
+        <div class="section-title">Studio</div>
+        <div class="settings-cols">
+          <div class="form-group"><label for="sName">Nome do studio</label><input type="text" id="sName" maxlength="60"></div>
+          <div class="form-group"><label for="sWhats">WhatsApp do studio</label><input type="tel" id="sWhats" placeholder="5511912345678" maxlength="20"><div class="form-hint">Com DDI. Aparece no comprovante.</div></div>
+        </div>
+        <div class="section-title" style="margin-top:1rem;">Horários</div>
+        <div class="settings-cols">
+          <div class="form-group"><label for="sStart">Abre às</label><input type="time" id="sStart"></div>
+          <div class="form-group"><label for="sEnd">Fecha às</label><input type="time" id="sEnd"></div>
+          <div class="form-group"><label for="sStep">Horários a cada</label>
+            <select id="sStep"><option value="30">30 minutos</option><option value="60">1 hora</option><option value="90">1h30</option><option value="120">2 horas</option></select></div>
+          <div class="form-group"><label for="sLead">Antecedência mínima (min)</label><input type="number" id="sLead" min="0" max="10080"></div>
+          <div class="form-group"><label for="sAdv">Agendar até (dias à frente)</label><input type="number" id="sAdv" min="1" max="365"></div>
+        </div>
+        <div class="form-group">
+          <label>Dias de atendimento</label>
+          <div class="checkbox-row" id="workingDays">
+            <label class="cb-item"><input type="checkbox" value="1"> Seg</label>
+            <label class="cb-item"><input type="checkbox" value="2"> Ter</label>
+            <label class="cb-item"><input type="checkbox" value="3"> Qua</label>
+            <label class="cb-item"><input type="checkbox" value="4"> Qui</label>
+            <label class="cb-item"><input type="checkbox" value="5"> Sex</label>
+            <label class="cb-item"><input type="checkbox" value="6"> Sáb</label>
+            <label class="cb-item"><input type="checkbox" value="0"> Dom</label>
+          </div>
+        </div>
+        <button id="btnSaveSettings" class="btn btn-primary" style="margin-bottom:2rem;">💾 Salvar configurações</button>
+
+        <div class="section-title">Serviços e preços</div>
+        <div class="appointments-list" id="manageServicesList"></div>
+        <div class="section-title" style="margin-top:1.6rem;">Adicionar serviço</div>
+        <div class="settings-cols">
+          <div class="form-group"><label for="nsName">Nome</label><input type="text" id="nsName" placeholder="Ex: Volume Egípcio" maxlength="60"></div>
+          <div class="form-group"><label for="nsPrice">Preço (R$)</label><input type="number" id="nsPrice" placeholder="150" min="0" step="0.01"></div>
+          <div class="form-group"><label for="nsDur">Duração</label><select id="nsDur"></select></div>
+        </div>
+        <button id="btnAddService" class="btn btn-success btn-full">➕ Adicionar serviço</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <p>© 2026 <span id="footName">Lumi Studio</span> — Todos os direitos reservados</p>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, set, get, remove, query, orderByChild, startAt, endAt }
+  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
+
+/* ══════════════════════════════════════════════════════════════
+   CONFIGURAÇÃO — cole aqui os dados do SEU projeto Firebase
+   (Console Firebase → ⚙️ Configurações do projeto → Seus apps → Web)
+══════════════════════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey:            "COLE_AQUI",
+  authDomain:        "SEU-PROJETO-ID.firebaseapp.com",
+  databaseURL:       "https://SEU-PROJETO-ID-default-rtdb.firebaseio.com",
+  projectId:         "SEU-PROJETO-ID",
+  storageBucket:     "SEU-PROJETO-ID.firebasestorage.app",
+  messagingSenderId: "COLE_AQUI",
+  appId:             "COLE_AQUI",
+};
+const FUNCTIONS_REGION = "southamerica-east1";
+
+/* ══════════════════════════════════════════════════════════════
+   CONSTANTES
+══════════════════════════════════════════════════════════════ */
+const TZ = "America/Sao_Paulo";
+const BLOCK = 30;
+const METHOD_LABELS = { pix: "PIX", credit: "Cartão de crédito", debit: "Cartão de débito", presencial: "No local" };
+const DEFAULT_SERVICES = {
+  cilios_fio_a_fio:   { name: "Cílios Fio a Fio",      price: 150, duration: 120 },
+  cilios_volume_br:   { name: "Volume Brasileiro",     price: 170, duration: 150 },
+  cilios_volume_russo:{ name: "Volume Russo",          price: 190, duration: 150 },
+  cilios_manutencao:  { name: "Manutenção de Cílios",  price: 90,  duration: 60 },
+  lash_lifting:       { name: "Lash Lifting",          price: 120, duration: 60 },
+  design_sobrancelha: { name: "Design de Sobrancelha", price: 45,  duration: 30 },
+  design_henna:       { name: "Design com Henna",      price: 60,  duration: 60 },
+  brow_lamination:    { name: "Brow Lamination",       price: 110, duration: 60 },
+};
+const DEFAULT_SETTINGS = {
+  studioName: "Lumi Studio", startTime: "09:00", endTime: "18:00", slotStep: 30,
+  workingDays: [2, 3, 4, 5, 6], leadMinutes: 60, maxAdvanceDays: 90, whatsapp: "",
+};
+
+/* ══════════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════════ */
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, "0");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtMoney = (v) => "R$ " + (Number(v) || 0).toFixed(2).replace(".", ",");
+const todayStr = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
+const parseSlot = (day, time) => Date.parse(`${day}T${time}:00-03:00`);
+const dowOf = (day) => new Date(`${day}T12:00:00Z`).getUTCDay();
+const toMin = (hhmm) => { const [h, m] = String(hhmm).split(":").map(Number); return h * 60 + m; };
+const minToStr = (m) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+const fmtDay = (ms) => new Date(ms).toLocaleDateString("pt-BR", { timeZone: TZ, weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const fmtDayShort = (ms) => new Date(ms).toLocaleDateString("pt-BR", { timeZone: TZ, weekday: "short", day: "2-digit", month: "2-digit" });
+const fmtTime = (ms) => new Date(ms).toLocaleTimeString("pt-BR", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
+const fmtDur = (min) => (min >= 60 ? `${Math.floor(min / 60)}h${min % 60 ? pad(min % 60) : ""}` : `${min} min`);
+const monthLabel = (y, m) => new Date(Date.UTC(y, m, 15)).toLocaleDateString("pt-BR", { timeZone: "UTC", month: "long", year: "numeric" });
+const digits = (s) => String(s || "").replace(/\D/g, "");
+const waNumber = (s) => { const d = digits(s); return d.length >= 12 ? d : d.length >= 10 ? "55" + d : d; };
+const blockKeys = (startMs, dur) => {
+  const first = Math.round(startMs / 60000), keys = [];
+  for (let i = 0; i < Math.ceil(dur / BLOCK); i++) keys.push(first + i * BLOCK);
+  return keys;
+};
+
+function showLoader(msg = "Carregando...") { $("loaderText").textContent = msg; $("globalLoader").classList.add("show"); }
+function hideLoader() { $("globalLoader").classList.remove("show"); }
+function toast(msg, type = "info", duration = 4500) {
+  const icons = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type] || "ℹ️"}</span><span>${esc(msg)}</span>`;
+  el.onclick = () => el.remove();
+  $("toastContainer").appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+function showAlert(id, msg, type) {
+  const el = $(id); if (!el) return;
+  el.innerHTML = `<div class="alert alert-${type}">${esc(msg)}</div>`;
+  if (type !== "error") setTimeout(() => { el.innerHTML = ""; }, 6000);
+}
+const clearAlert = (id) => { const el = $(id); if (el) el.innerHTML = ""; };
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function btnLoad(btn, on) { if (!btn) return; btn.disabled = on; btn.classList.toggle("loading", on); }
+let _busy = false;
+const guard = (fn) => async (...a) => { if (_busy) return; _busy = true; try { await fn(...a); } finally { _busy = false; } };
+const fnMsg = (e, fallback) => (e && e.message && !/^internal$/i.test(e.message) ? e.message : fallback);
+
+/* ══════════════════════════════════════════════════════════════
+   FIREBASE
+══════════════════════════════════════════════════════════════ */
+const configured = !String(FIREBASE_CONFIG.apiKey).startsWith("COLE");
+let auth, db, fn = {};
+if (configured) {
+  const app = initializeApp(FIREBASE_CONFIG);
+  auth = getAuth(app);
+  db = getDatabase(app);
+  const functions = getFunctions(app, FUNCTIONS_REGION);
+  for (const n of ["createPayment", "cancelPayment", "checkPayment", "cancelAppointment", "adminBook", "adminMarkPaid"]) {
+    fn[n] = httpsCallable(functions, n);
+  }
+}
+const fbGet = (p) => get(ref(db, p));
+const fbSet = (p, v) => set(ref(db, p), v);
+
+/* ══════════════════════════════════════════════════════════════
+   ESTADO
+══════════════════════════════════════════════════════════════ */
+const S = {
+  user: null, profile: null, isAdmin: false, registering: false,
+  settings: { ...DEFAULT_SETTINGS }, services: { ...DEFAULT_SERVICES },
+  selService: null, selPayMethod: "pix",
+  payExistingId: null, activeAptId: null, pixPoll: null, pixClock: null, pixCheck: null,
+  adminDay: null, adminMonth: null,
+};
+
+async function loadConfigData() {
+  try {
+    const [st, sv] = await Promise.all([fbGet("settings"), fbGet("services")]);
+    S.settings = st.exists() ? { ...DEFAULT_SETTINGS, ...st.val() } : { ...DEFAULT_SETTINGS };
+    S.settings.workingDays = Object.values(S.settings.workingDays || []).map(Number);
+    S.services = sv.exists() ? sv.val() : { ...DEFAULT_SERVICES };
+  } catch (e) { console.warn("config:", e); }
+  applyBrand();
+}
+function applyBrand() {
+  const name = S.settings.studioName || "Lumi Studio";
+  const parts = name.trim().split(/\s+/);
+  const last = parts.length > 1 ? parts.pop() : "";
+  $("brandName").innerHTML = `${esc(parts.join(" "))}${last ? ` <em>${esc(last)}</em>` : ""}<span class="logo-sub">Cílios & Sobrancelhas</span>`;
+  $("footName").textContent = name;
+  document.title = `${name} — Cílios & Sobrancelhas`;
+}
+async function loadBusy() {
+  try { const s = await fbGet("busy"); return s.exists() ? s.val() : {}; } catch { return {}; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AUTENTICAÇÃO
+══════════════════════════════════════════════════════════════
+   Senhas são guardadas pelo Firebase Authentication (hash seguro) — nunca no banco.
+   Quem é administradora é definido em /admins/{uid} = true, só pelo console do Firebase. */
+const AUTH_ERRORS = {
+  "auth/invalid-credential": "E-mail ou senha incorretos.",
+  "auth/wrong-password": "E-mail ou senha incorretos.",
+  "auth/user-not-found": "E-mail ou senha incorretos.",
+  "auth/invalid-email": "E-mail inválido.",
+  "auth/email-already-in-use": "Este e-mail já tem conta. Use “Entrar”.",
+  "auth/weak-password": "Senha muito fraca — use pelo menos 6 caracteres.",
+  "auth/too-many-requests": "Muitas tentativas. Aguarde alguns minutos e tente de novo.",
+  "auth/network-request-failed": "Sem conexão com a internet.",
+  "auth/operation-not-allowed": "Login por e-mail/senha não está ativado no Firebase (veja o SETUP.md).",
+};
+let authMode = "login";
+function setAuthMode(mode) {
+  authMode = mode;
+  const reg = mode === "register";
+  $("tabLogin").classList.toggle("active", !reg);
+  $("tabRegister").classList.toggle("active", reg);
+  $("gName").style.display = reg ? "block" : "none";
+  $("gPhone").style.display = reg ? "block" : "none";
+  $("btnAuth").textContent = reg ? "Criar minha conta" : "Entrar";
+  $("fPass").autocomplete = reg ? "new-password" : "current-password";
+  $("btnForgot").style.display = reg ? "none" : "inline";
+  clearAlert("loginAlert");
+}
+
+async function submitAuth(ev) {
+  ev.preventDefault();
+  clearAlert("loginAlert");
+  const email = $("fEmail").value.trim(), pass = $("fPass").value;
+  if (!email || !pass) return showAlert("loginAlert", "Preencha e-mail e senha.", "warning");
+  const btn = $("btnAuth");
+
+  if (authMode === "register") {
+    const name = $("fName").value.trim(), phone = digits($("fPhone").value);
+    if (name.length < 2) return showAlert("loginAlert", "Informe seu nome.", "warning");
+    if (phone.length < 10) return showAlert("loginAlert", "Informe seu WhatsApp com DDD.", "warning");
+    if (pass.length < 6) return showAlert("loginAlert", "A senha precisa ter pelo menos 6 caracteres.", "warning");
+    btnLoad(btn, true); showLoader("Criando conta...");
+    S.registering = true;
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name }).catch(() => {});
+      await fbSet(`users/${cred.user.uid}`, { name, phone, email, createdAt: new Date().toISOString() });
+      S.registering = false;
+      toast(`Bem-vinda, ${name.split(" ")[0]}! 💖`, "success");
+      await routeAfterLogin(cred.user);
+    } catch (e) {
+      S.registering = false;
+      console.error("register:", e);
+      showAlert("loginAlert", AUTH_ERRORS[e.code] || "Não foi possível criar a conta. Tente novamente.", "error");
+    } finally { btnLoad(btn, false); hideLoader(); }
+  } else {
+    btnLoad(btn, true); showLoader("Entrando...");
+    try {
+      await signInWithEmailAndPassword(auth, email, pass); // onAuthStateChanged cuida do resto
+    } catch (e) {
+      console.error("login:", e);
+      showAlert("loginAlert", AUTH_ERRORS[e.code] || "Não foi possível entrar. Tente novamente.", "error");
+      $("fPass").value = "";
+    } finally { btnLoad(btn, false); hideLoader(); }
+  }
+}
+
+async function forgotPassword() {
+  const email = $("fEmail").value.trim();
+  if (!email) return showAlert("loginAlert", "Digite seu e-mail acima e clique de novo em “Esqueci minha senha”.", "warning");
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (e) {
+    if (e.code !== "auth/user-not-found") return showAlert("loginAlert", AUTH_ERRORS[e.code] || "Não foi possível enviar o e-mail.", "error");
+  }
+  showAlert("loginAlert", "Se esse e-mail tiver conta, enviamos um link para redefinir a senha. Veja também o spam.", "success");
+}
+
+async function logout() {
+  stopPixTimers();
+  await signOut(auth);
+  S.selService = null; S.activeAptId = null; S.payExistingId = null;
+  toast("Até logo! 💖", "info", 2500);
+}
+
+function updateUserInfo() {
+  const u = S.user;
+  const name = (S.profile && S.profile.name) || (u && (u.displayName || u.email)) || "";
+  $("userInfo").innerHTML = u
+    ? `<span class="user-name">${S.isAdmin ? "👑 " : ""}${esc(name.split(" ")[0])}</span><button id="btnLogout" class="btn btn-secondary btn-sm">Sair</button>`
+    : "";
+  const b = $("btnLogout"); if (b) b.addEventListener("click", logout);
+}
+
+async function routeAfterLogin(user) {
+  S.user = user;
+  try { S.isAdmin = (await fbGet(`admins/${user.uid}`)).val() === true; } catch { S.isAdmin = false; }
+  try { S.profile = (await fbGet(`users/${user.uid}`)).val(); } catch { S.profile = null; }
+  await loadConfigData();
+  updateUserInfo();
+
+  const qs = new URLSearchParams(location.search);
+  const retApt = qs.get("apt");
+  if (retApt) { await handleCheckoutReturn(retApt, qs.get("result")); return; }
+  S.isAdmin ? showAdminScreen() : showClientScreen();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SELETOR DE DIA/HORÁRIO (usado pela cliente e pela admin)
+══════════════════════════════════════════════════════════════ */
+function makePicker(ids, getDuration, isAdmin) {
+  const t = todayStr();
+  const st = { y: Number(t.slice(0, 4)), m: Number(t.slice(5, 7)) - 1, day: null, time: null };
+
+  async function renderCalendar() {
+    $(ids.label).textContent = monthLabel(st.y, st.m);
+    const cal = $(ids.cal); cal.innerHTML = "";
+    const today = todayStr();
+    const maxDay = new Date(Date.now() + (S.settings.maxAdvanceDays || 90) * 86400000);
+    const maxStr = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(maxDay);
+    const first = new Date(Date.UTC(st.y, st.m, 1)).getUTCDay();
+    for (let i = 0; i < first; i++) cal.insertAdjacentHTML("beforeend", '<div class="day-card blank"></div>');
+    const days = new Date(Date.UTC(st.y, st.m + 1, 0)).getUTCDate();
+    for (let d = 1; d <= days; d++) {
+      const day = `${st.y}-${pad(st.m + 1)}-${pad(d)}`;
+      const ok = S.settings.workingDays.includes(dowOf(day)) && day >= today && (isAdmin || day <= maxStr);
+      const el = document.createElement("div");
+      el.className = "day-card" + (ok ? "" : " disabled") + (day === today ? " today" : "") + (day === st.day ? " selected" : "");
+      el.textContent = d;
+      if (ok) el.addEventListener("click", () => {
+        cal.querySelectorAll(".day-card").forEach((c) => c.classList.remove("selected"));
+        el.classList.add("selected");
+        st.day = day; st.time = null;
+        renderSlots();
+      });
+      cal.appendChild(el);
+    }
+    if (ids.prev) $(ids.prev).disabled = st.y === Number(today.slice(0, 4)) && st.m <= Number(today.slice(5, 7)) - 1;
+  }
+
+  async function renderSlots() {
+    const sec = $(ids.slotsSec), box = $(ids.slots);
+    if (!st.day) { sec.style.display = "none"; return; }
+    sec.style.display = "block";
+    const dur = getDuration();
+    if (!dur) { box.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:1rem;">Escolha um serviço para ver os horários.</div>'; return; }
+    box.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:1rem;">Carregando horários…</div>';
+    const busy = await loadBusy();
+    const now = Date.now();
+    const open = toMin(S.settings.startTime), close = toMin(S.settings.endTime);
+    const step = Math.max(BLOCK, parseInt(S.settings.slotStep) || BLOCK);
+    const lead = isAdmin ? 0 : (Number(S.settings.leadMinutes) || 0) * 60000;
+    box.innerHTML = "";
+    let any = false;
+    for (let m = open; m + dur <= close; m += step) {
+      const time = minToStr(m), ms = parseSlot(st.day, time);
+      const past = ms < now + lead;
+      const taken = blockKeys(ms, dur).some((k) => busy[k] && (busy[k].e === 0 || busy[k].e > now));
+      const el = document.createElement("div");
+      el.className = "time-slot" + (past || taken ? " booked" : "") + (st.time === time ? " selected" : "");
+      el.textContent = time;
+      if (!past && !taken) {
+        any = true;
+        el.addEventListener("click", () => {
+          box.querySelectorAll(".time-slot").forEach((s) => s.classList.remove("selected"));
+          el.classList.add("selected"); st.time = time;
+        });
+      }
+      box.appendChild(el);
+    }
+    if (!any) box.insertAdjacentHTML("beforeend", '<div class="empty" style="grid-column:1/-1;padding:1rem;">Sem horários livres nesse dia para este serviço. Tente outro dia.</div>');
+  }
+
+  const move = (delta) => { st.m += delta; if (st.m < 0) { st.m = 11; st.y--; } if (st.m > 11) { st.m = 0; st.y++; } renderCalendar(); };
+  $(ids.prev).addEventListener("click", () => move(-1));
+  $(ids.next).addEventListener("click", () => move(1));
+  return { st, renderCalendar, renderSlots, reset() { st.day = null; st.time = null; $(ids.slotsSec).style.display = "none"; } };
+}
+
+function renderServiceCards(containerId, getSel, setSel, onPick) {
+  const c = $(containerId); c.innerHTML = "";
+  const entries = Object.entries(S.services);
+  if (!entries.length) { c.innerHTML = '<div class="empty" style="grid-column:1/-1;">Nenhum serviço cadastrado ainda.</div>'; return; }
+  entries.forEach(([key, svc]) => {
+    const card = document.createElement("div");
+    card.className = "service-card" + (getSel() === key ? " selected" : "");
+    card.innerHTML = `<div class="svc-name">${esc(svc.name)}</div><div class="svc-dur">⏱ ${fmtDur(svc.duration)}</div><div class="svc-price">${fmtMoney(svc.price)}</div>`;
+    card.addEventListener("click", () => {
+      c.querySelectorAll(".service-card").forEach((x) => x.classList.remove("selected"));
+      card.classList.add("selected"); setSel(key); onPick && onPick();
+    });
+    c.appendChild(card);
+  });
+}
+
+let clientPicker, adminPicker;
+
+/* ══════════════════════════════════════════════════════════════
+   CLIENTE
+══════════════════════════════════════════════════════════════ */
+function showClientScreen() {
+  showScreen("clientScreen");
+  document.querySelectorAll("#clientScreen .tab").forEach((t, i) => t.classList.toggle("active", i === 0));
+  $("bookingTab").style.display = "block"; $("historyTab").style.display = "none";
+  renderBooking();
+}
+function renderBooking() {
+  if (S.selService && !S.services[S.selService]) S.selService = null;
+  renderServiceCards("servicesList", () => S.selService, (k) => { S.selService = k; }, () => clientPicker.renderSlots());
+  clientPicker.renderCalendar();
+  clientPicker.renderSlots();
+}
+function showClientTab(tab, btn) {
+  document.querySelectorAll("#clientScreen .tab").forEach((t) => t.classList.remove("active"));
+  btn.classList.add("active");
+  $("bookingTab").style.display = tab === "booking" ? "block" : "none";
+  $("historyTab").style.display = tab === "history" ? "block" : "none";
+  tab === "booking" ? renderBooking() : loadClientHistory();
+}
+
+function proceedToPayment() {
+  const p = clientPicker.st;
+  if (!S.selService) return toast("Escolha um serviço", "warning");
+  if (!p.day || !p.time) return toast("Escolha o dia e o horário", "warning");
+  const svc = S.services[S.selService];
+  fillPaySummary({ serviceName: svc.name, start: parseSlot(p.day, p.time), duration: svc.duration, servicePrice: svc.price });
+  S.payExistingId = null; S.selPayMethod = "pix";
+  document.querySelectorAll("#payMethodOptions .method-opt").forEach((o) => o.classList.toggle("selected", o.dataset.method === "pix"));
+  clearAlert("paymentAlert");
+  showScreen("paymentScreen");
+}
+function fillPaySummary(a) {
+  $("pServiceName").textContent = a.serviceName;
+  $("pDate").textContent = fmtDay(a.start);
+  $("pTime").textContent = `${fmtTime(a.start)} (${fmtDur(a.duration)})`;
+  $("pAmount").textContent = fmtMoney(a.servicePrice);
+}
+
+/* ── histórico ── */
+const statusBadge = (a) => {
+  if (a.paymentStatus === "paid") return '<span class="badge badge-paid">✓ Confirmado</span>';
+  if (a.paymentStatus === "awaiting_payment") return '<span class="badge badge-wait">⏳ Aguardando pagamento</span>';
+  if (a.paymentStatus === "pending") return '<span class="badge badge-local">Pagar no local</span>';
+  if (a.paymentStatus === "refunded") return '<span class="badge badge-refund">Reembolsado</span>';
+  return "";
+};
+
+async function loadClientHistory() {
+  const box1 = $("futureAppointments"), box2 = $("pastAppointments");
+  box1.innerHTML = box2.innerHTML = '<div class="empty">Carregando…</div>';
+  try {
+    const idsSnap = await fbGet(`userAppointments/${S.user.uid}`);
+    const ids = idsSnap.exists() ? Object.keys(idsSnap.val()) : [];
+    const rows = await Promise.all(ids.map((id) => fbGet(`appointments/${id}`).then((s) => (s.exists() ? { id, ...s.val() } : null)).catch(() => null)));
+    const now = Date.now();
+    const mine = rows.filter(Boolean)
+      .filter((a) => !(a.paymentStatus === "awaiting_payment" && (a.expiresAt || 0) < now))
+      .filter((a) => a.paymentStatus !== "refunded" || a.start >= now - 30 * 86400000)
+      .sort((a, b) => b.start - a.start);
+    renderClientApts("futureAppointments", mine.filter((a) => a.start >= now).reverse(), false);
+    renderClientApts("pastAppointments", mine.filter((a) => a.start < now), true);
+  } catch (e) {
+    console.error(e);
+    box1.innerHTML = box2.innerHTML = "";
+    showAlert("historyAlert", "Não foi possível carregar seus agendamentos.", "error");
+  }
+}
+
+function renderClientApts(id, apts, isPast) {
+  const c = $(id);
+  if (!apts.length) { c.innerHTML = '<div class="empty"><span>📭</span>Nenhum agendamento</div>'; return; }
+  c.innerHTML = apts.map((a) => {
+    const awaiting = a.paymentStatus === "awaiting_payment";
+    const can24 = a.start - Date.now() > 24 * 3600 * 1000;
+    const canCancel = !isPast && (awaiting || (a.paymentStatus !== "refunded" && can24));
+    return `<div class="apt-card ${isPast ? "past" : awaiting ? "dim" : ""}">
+      <div class="apt-info">
+        <h3>${esc(fmtDay(a.start))}</h3>
+        <p>🕐 ${fmtTime(a.start)} – ${fmtTime(a.start + a.duration * 60000)} &nbsp;|&nbsp; ✨ ${esc(a.serviceName)} &nbsp;|&nbsp; ${fmtMoney(a.servicePrice)}</p>
+        ${a.paymentMethod ? `<p>Pagamento: ${esc(METHOD_LABELS[a.paymentMethod] || "—")}</p>` : ""}
+        ${statusBadge(a)}
+      </div>
+      <div class="apt-actions">
+        ${!isPast && awaiting ? `<button class="btn btn-primary btn-sm" data-pay-now="${esc(a.id)}">💳 Pagar</button>` : ""}
+        ${canCancel ? `<button class="btn btn-danger btn-sm" data-cancel="${esc(a.id)}" data-status="${esc(a.paymentStatus)}">Cancelar</button>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+  c.querySelectorAll("[data-pay-now]").forEach((b) => b.addEventListener("click", () => payExisting(b.dataset.payNow)));
+  c.querySelectorAll("[data-cancel]").forEach((b) => b.addEventListener("click", guard(() => clientCancel(b.dataset.cancel, b.dataset.status))));
+}
+
+async function clientCancel(id, status) {
+  const msg = status === "paid"
+    ? "Cancelar este agendamento? O valor pago será estornado automaticamente no mesmo meio de pagamento."
+    : "Cancelar este agendamento?";
+  if (!confirm(msg)) return;
+  showLoader("Cancelando...");
+  try {
+    if (status === "awaiting_payment") await fn.cancelPayment({ appointmentId: id });
+    else await fn.cancelAppointment({ appointmentId: id });
+    toast(status === "paid" ? "Cancelado e estornado ✔" : "Agendamento cancelado", "success");
+  } catch (e) { toast(fnMsg(e, "Não foi possível cancelar."), "error", 6500); }
+  finally { hideLoader(); loadClientHistory(); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGAMENTO
+══════════════════════════════════════════════════════════════ */
+function stopPixTimers() {
+  clearInterval(S.pixPoll); clearInterval(S.pixClock); clearInterval(S.pixCheck);
+  S.pixPoll = S.pixClock = S.pixCheck = null;
+}
+
+async function payExisting(aptId) {
+  try {
+    const snap = await fbGet(`appointments/${aptId}`);
+    if (!snap.exists()) return toast("Esse agendamento expirou. Escolha o horário de novo.", "warning");
+    const a = snap.val();
+    S.payExistingId = aptId; S.selPayMethod = "pix";
+    fillPaySummary(a);
+    document.querySelectorAll("#payMethodOptions .method-opt").forEach((o) => o.classList.toggle("selected", o.dataset.method === "pix"));
+    clearAlert("paymentAlert");
+    showScreen("paymentScreen");
+  } catch { toast("Erro ao abrir pagamento", "error"); }
+}
+
+async function goToPayStep() {
+  let payload, svcName, when;
+  if (S.payExistingId) {
+    const snap = await fbGet(`appointments/${S.payExistingId}`);
+    if (!snap.exists()) { toast("Esse agendamento expirou.", "warning"); return showClientScreen(); }
+    const a = snap.val();
+    payload = { method: S.selPayMethod, appointmentId: S.payExistingId };
+    svcName = a.serviceName; when = `${fmtDayShort(a.start)} às ${fmtTime(a.start)}`;
+  } else {
+    const p = clientPicker.st, svc = S.services[S.selService];
+    payload = { method: S.selPayMethod, booking: { service: S.selService, day: p.day, time: p.time } };
+    svcName = svc.name; when = `${fmtDayShort(parseSlot(p.day, p.time))} às ${p.time}`;
+  }
+
+  showLoader(S.selPayMethod === "pix" ? "Reservando horário e gerando PIX..." : "Abrindo pagamento seguro...");
+  let redirecting = false;
+  try {
+    const { data } = await fn.createPayment(payload);
+    S.activeAptId = data.appointmentId;
+    if (S.selPayMethod === "pix") renderPix(data, svcName, when);
+    else { redirecting = true; window.location.href = data.checkoutUrl; }
+  } catch (e) {
+    console.error("createPayment:", e);
+    toast(fnMsg(e, "Não foi possível gerar o pagamento."), "error", 7000);
+    if (/horário|ocupado|reservado/i.test(e.message || "")) { clientPicker.st.time = null; showClientScreen(); }
+  } finally { if (!redirecting) hideLoader(); }
+}
+
+function renderPix(data, svcName, when) {
+  $("pixSvcName").textContent = svcName;
+  $("pixDate").textContent = when;
+  $("pixAmount").textContent = fmtMoney(data.amount);
+  clearAlert("pixAlert");
+  $("pixBox").style.display = "block";
+  $("pixStatus").textContent = "⏳ Aguardando pagamento...";
+  window._pixPayload = (data.pix && data.pix.qrCode) || "";
+
+  const box = $("qrCodeContainer");
+  if (data.pix && data.pix.qrCodeBase64) {
+    box.innerHTML = "";
+    const img = new Image();
+    img.alt = "QR Code PIX";
+    img.style.cssText = "border-radius:14px;border:4px solid #fff;box-shadow:0 4px 16px rgba(230,23,122,.2);background:#fff;width:220px;height:220px;display:block;";
+    img.src = "data:image/png;base64," + data.pix.qrCodeBase64;
+    box.appendChild(img);
+  } else box.innerHTML = '<div style="color:var(--yellow);font-size:.85rem;">Use o botão abaixo para copiar o código PIX.</div>';
+
+  showScreen("pixScreen");
+  stopPixTimers();
+  const tick = () => {
+    const left = data.expiresAt - Date.now();
+    const el = $("pixTimer");
+    if (left <= 0) {
+      stopPixTimers();
+      el.textContent = "PIX expirado";
+      $("pixBox").style.display = "none";
+      showAlert("pixAlert", "O PIX expirou. Clique em Cancelar e escolha o horário de novo.", "error");
+      return;
+    }
+    el.textContent = `Expira em ${pad(Math.floor(left / 60000))}:${pad(Math.floor((left % 60000) / 1000))}`;
+  };
+  tick();
+  S.pixClock = setInterval(tick, 1000);
+  S.pixPoll = setInterval(() => checkPixPaid(false), 4000);
+  S.pixCheck = setInterval(() => checkPixPaid(true, true), 25000); // confere direto no Mercado Pago (reserva caso o webhook atrase)
+}
+
+async function checkPixPaid(manual, viaServer) {
+  if (!S.activeAptId) return;
+  try {
+    let status;
+    if (manual || viaServer) {
+      const { data } = await fn.checkPayment({ appointmentId: S.activeAptId });
+      status = data.status;
+    } else {
+      const s = await fbGet(`appointments/${S.activeAptId}/paymentStatus`);
+      status = s.exists() ? s.val() : null;
+    }
+    if (status === "paid") {
+      stopPixTimers();
+      const id = S.activeAptId; S.activeAptId = null; S.payExistingId = null;
+      await showConfirmation(id);
+    } else if (manual && !viaServer) toast("Pagamento ainda não identificado. Aguarde alguns segundos e tente de novo.", "info");
+  } catch (e) { if (manual && !viaServer) toast("Erro ao verificar pagamento", "error"); }
+}
+
+function copyPixCode() {
+  const code = window._pixPayload || "";
+  if (!code) return toast("Código não disponível", "error");
+  navigator.clipboard.writeText(code).then(() => toast("Código PIX copiado!", "success")).catch(() => toast("Copie manualmente", "warning"));
+}
+
+async function showConfirmation(aptId) {
+  const snap = await fbGet(`appointments/${aptId}`);
+  if (!snap.exists()) return showClientScreen();
+  const a = snap.val();
+  const wa = waNumber(S.settings.whatsapp);
+  const method = METHOD_LABELS[a.paymentMethod] || "—";
+  const studio = S.settings.studioName || "Lumi Studio";
+  const msg = encodeURIComponent(
+    `💖 *Agendamento confirmado — ${studio}*\n\n👤 ${a.clientName}\n✨ ${a.serviceName}\n📅 ${fmtDay(a.start)}\n🕐 ${fmtTime(a.start)}\n💰 ${fmtMoney(a.servicePrice)} (${method} — pago)`
+  );
+  $("confirmCard").innerHTML = `
+    <h2 style="color:var(--green);">Pagamento aprovado!</h2>
+    <div style="text-align:center;padding:1.2rem 0;">
+      <div style="font-size:3.6rem;">🎉</div>
+      <p style="font-family:var(--serif);font-size:1.35rem;font-weight:600;margin:.4rem 0 .2rem;">${esc(a.serviceName)}</p>
+      <p style="color:var(--muted);font-size:.92rem;">${esc(fmtDay(a.start))} às ${fmtTime(a.start)}</p>
+    </div>
+    <div class="pay-summary">
+      <div class="pay-row"><span>Serviço</span><span>${esc(a.serviceName)}</span></div>
+      <div class="pay-row"><span>Data</span><span>${esc(fmtDay(a.start))}</span></div>
+      <div class="pay-row"><span>Horário</span><span>${fmtTime(a.start)} – ${fmtTime(a.start + a.duration * 60000)}</span></div>
+      <div class="pay-row"><span>Pagamento</span><span>${esc(method)}</span></div>
+      <div class="pay-row total"><span>Total</span><span>${fmtMoney(a.servicePrice)}</span></div>
+    </div>
+    ${wa ? `<a href="https://wa.me/${wa}?text=${msg}" target="_blank" rel="noopener" class="btn btn-success btn-full">📲 Enviar comprovante no WhatsApp</a>` : ""}
+    <button id="btnBackFromConfirm" class="btn btn-secondary btn-full">← Voltar ao início</button>`;
+  $("btnBackFromConfirm").addEventListener("click", showClientScreen);
+  S.selService = null; clientPicker.reset();
+  showScreen("confirmScreen");
+}
+
+// A cliente voltou do Checkout Pro (cartão). Quem decide é o servidor, que pergunta ao Mercado Pago.
+async function handleCheckoutReturn(aptId, result) {
+  history.replaceState(null, "", location.pathname);
+  const card = $("confirmCard");
+  const back = '<button id="btnBackFromConfirm" class="btn btn-secondary btn-full" style="margin-top:1rem;">← Voltar ao início</button>';
+  const bindBack = () => $("btnBackFromConfirm").addEventListener("click", showClientScreen);
+  showScreen("confirmScreen");
+
+  if (result === "failure") {
+    showLoader("Liberando horário...");
+    try { await fn.cancelPayment({ appointmentId: aptId }); } catch {}
+    hideLoader();
+    card.innerHTML = `<h2 style="color:var(--red);">Pagamento não concluído</h2><div class="empty"><span>❌</span>O pagamento não foi aprovado e nada foi cobrado. Escolha o horário novamente para tentar de novo.</div>${back}`;
+    return bindBack();
+  }
+  card.innerHTML = `<h2>Verificando pagamento...</h2><div class="empty"><span>⏳</span>Aguarde, estamos confirmando com o Mercado Pago.</div>`;
+  for (let i = 0; i < 12; i++) {
+    try {
+      const { data } = await fn.checkPayment({ appointmentId: aptId });
+      if (data.status === "paid") return showConfirmation(aptId);
+      if (data.status === "gone") break;
+    } catch {}
+    await new Promise((r) => setTimeout(r, 3000));
+  }
+  card.innerHTML = `<h2 style="color:var(--yellow);">Pagamento em análise</h2><div class="empty"><span>🕐</span>Ainda não recebemos a confirmação. Se você já pagou, o agendamento aparece em <strong>Meus agendamentos</strong> assim que o Mercado Pago aprovar.</div>${back}`;
+  bindBack();
+}
+
+async function cancelPaymentScreen() {
+  stopPixTimers();
+  const id = S.activeAptId;
+  S.activeAptId = null; S.payExistingId = null;
+  if (id) {
+    showLoader("Cancelando...");
+    try {
+      const { data } = await fn.cancelPayment({ appointmentId: id });
+      if (data && data.ok === false && data.reason === "paid") { hideLoader(); return showConfirmation(id); }
+    } catch (e) { console.warn("cancelPayment:", e); }
+    hideLoader();
+  }
+  showClientScreen();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ADMINISTRADORA
+══════════════════════════════════════════════════════════════ */
+const ATABS = ["daily", "monthly", "book", "settings"];
+function showAdminScreen() {
+  showScreen("adminScreen");
+  document.querySelectorAll("#adminScreen .tab").forEach((t, i) => t.classList.toggle("active", i === 0));
+  ATABS.forEach((t, i) => { $(t + "Tab").style.display = i === 0 ? "block" : "none"; });
+  $("adminDaySelect").value = S.adminDay = todayStr();
+  loadDaily();
+}
+function showAdminTab(tab, btn) {
+  document.querySelectorAll("#adminScreen .tab").forEach((t) => t.classList.remove("active"));
+  btn.classList.add("active");
+  ATABS.forEach((t) => { $(t + "Tab").style.display = t === tab ? "block" : "none"; });
+  if (tab === "daily") loadDaily();
+  else if (tab === "monthly") loadMonthly();
+  else if (tab === "book") { renderServiceCards("aServicesList", () => adminSel, (k) => { adminSel = k; }, () => adminPicker.renderSlots()); adminPicker.renderCalendar(); adminPicker.renderSlots(); }
+  else if (tab === "settings") renderSettings();
+}
+let adminSel = null;
+
+async function fetchRange(d0, d1) {
+  const q = query(ref(db, "appointments"), orderByChild("start"), startAt(d0), endAt(d1));
+  const snap = await get(q);
+  const out = [];
+  snap.forEach((c) => { out.push({ id: c.key, ...c.val() }); });
+  return out.sort((a, b) => a.start - b.start);
+}
+function statsHtml(apts) {
+  const paid = apts.filter((a) => a.paymentStatus === "paid");
+  const total = paid.reduce((s, a) => s + Number(a.servicePrice || 0), 0);
+  return `<div class="stat"><small>Atendimentos</small><b>${apts.filter((a) => a.paymentStatus !== "awaiting_payment").length}</b></div>
+          <div class="stat"><small>Recebido</small><b>${fmtMoney(total)}</b></div>`;
+}
+async function loadDaily() {
+  const day = $("adminDaySelect").value; if (!day) return;
+  try {
+    const apts = await fetchRange(parseSlot(day, "00:00"), parseSlot(day, "00:00") + 86400000 - 1);
+    $("dailyStats").innerHTML = statsHtml(apts);
+    renderAdminApts("dailyAppointments", apts);
+  } catch (e) { console.error(e); $("dailyAppointments").innerHTML = '<div class="alert alert-error">Sem permissão para ler a agenda. Sua conta é administradora? (veja o SETUP.md)</div>'; }
+}
+async function loadMonthly() {
+  if (!S.adminMonth) { const t = todayStr(); S.adminMonth = { y: Number(t.slice(0, 4)), m: Number(t.slice(5, 7)) - 1 }; }
+  const { y, m } = S.adminMonth;
+  $("adminCurrentMonth").textContent = monthLabel(y, m);
+  const d0 = parseSlot(`${y}-${pad(m + 1)}-01`, "00:00");
+  const ny = m === 11 ? y + 1 : y, nm = m === 11 ? 0 : m + 1;
+  const d1 = parseSlot(`${ny}-${pad(nm + 1)}-01`, "00:00") - 1;
+  try {
+    const apts = await fetchRange(d0, d1);
+    $("monthlyStats").innerHTML = statsHtml(apts);
+    renderAdminApts("monthlyAppointments", apts);
+  } catch (e) { console.error(e); $("monthlyAppointments").innerHTML = '<div class="alert alert-error">Sem permissão para ler a agenda.</div>'; }
+}
+
+function renderAdminApts(id, apts) {
+  const c = $(id);
+  if (!apts.length) { c.innerHTML = '<div class="empty"><span>📭</span>Nenhum agendamento</div>'; return; }
+  c.innerHTML = apts.map((a) => {
+    const wa = a.clientPhone ? waNumber(a.clientPhone) : "";
+    return `<div class="apt-card ${a.paymentStatus === "awaiting_payment" ? "dim" : ""}">
+      <div class="apt-info">
+        <h3>${esc(a.clientName)}</h3>
+        <p>${esc(fmtDayShort(a.start))} · 🕐 ${fmtTime(a.start)} – ${fmtTime(a.start + a.duration * 60000)}</p>
+        <p>✨ ${esc(a.serviceName)} &nbsp;|&nbsp; ${fmtMoney(a.servicePrice)}</p>
+        ${a.paymentMethod ? `<p>Pagamento: ${esc(METHOD_LABELS[a.paymentMethod] || "—")}</p>` : ""}
+        ${statusBadge(a)}${a.bookedByAdmin ? '<span class="badge badge-admin">Lançado por você</span>' : ""}
+      </div>
+      <div class="apt-actions" style="flex-direction:column;align-items:stretch;">
+        ${wa ? `<a class="btn btn-secondary btn-sm" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">💬 WhatsApp</a>` : ""}
+        ${a.paymentStatus === "pending" ? `<button class="btn btn-success btn-sm" data-markpaid="${esc(a.id)}">✓ Marcar pago</button>` : ""}
+        ${a.paymentStatus !== "refunded" ? `<button class="btn btn-danger btn-sm" data-acancel="${esc(a.id)}" data-status="${esc(a.paymentStatus)}" data-mp="${a.mpPaymentId ? 1 : 0}">Cancelar</button>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+  c.querySelectorAll("[data-markpaid]").forEach((b) => b.addEventListener("click", guard(async () => {
+    if (!confirm("Confirmar que o pagamento foi recebido?")) return;
+    showLoader("Salvando...");
+    try { await fn.adminMarkPaid({ appointmentId: b.dataset.markpaid }); toast("Marcado como pago", "success"); }
+    catch (e) { toast(fnMsg(e, "Erro ao salvar"), "error"); }
+    finally { hideLoader(); refreshAdminLists(); }
+  })));
+  c.querySelectorAll("[data-acancel]").forEach((b) => b.addEventListener("click", guard(async () => {
+    if (!confirm("Cancelar este agendamento?")) return;
+    let refund = false;
+    if (b.dataset.status === "paid" && b.dataset.mp === "1") refund = confirm("Estornar o valor automaticamente no Mercado Pago?\n\nOK = estornar e cancelar\nCancelar = cancelar SEM estornar");
+    showLoader("Cancelando...");
+    try { const { data } = await fn.cancelAppointment({ appointmentId: b.dataset.acancel, refund }); toast(data.refunded ? "Cancelado e estornado" : "Agendamento cancelado", "success"); }
+    catch (e) { toast(fnMsg(e, "Erro ao cancelar"), "error", 7000); }
+    finally { hideLoader(); refreshAdminLists(); }
+  })));
+}
+const refreshAdminLists = () => { loadDaily(); if ($("monthlyTab").style.display !== "none") loadMonthly(); };
+
+async function adminBook() {
+  const name = $("aClientName").value.trim(), p = adminPicker.st;
+  if (name.length < 2) return toast("Digite o nome da cliente", "warning");
+  if (!adminSel) return toast("Escolha um serviço", "warning");
+  if (!p.day || !p.time) return toast("Escolha o dia e o horário", "warning");
+  const btn = $("btnAdminBook"); btnLoad(btn, true); showLoader("Agendando...");
+  try {
+    await fn.adminBook({ clientName: name, clientPhone: $("aClientPhone").value, service: adminSel, day: p.day, time: p.time, paid: $("aPaid").checked });
+    toast(`Agendado para ${name}!`, "success");
+    $("aClientName").value = ""; $("aClientPhone").value = ""; $("aPaid").checked = false;
+    adminSel = null; adminPicker.reset();
+    renderServiceCards("aServicesList", () => adminSel, (k) => { adminSel = k; }, () => adminPicker.renderSlots());
+    adminPicker.renderCalendar();
+  } catch (e) { toast(fnMsg(e, "Erro ao agendar"), "error", 6500); }
+  finally { btnLoad(btn, false); hideLoader(); }
+}
+
+/* ── configurações ── */
+function renderSettings() {
+  const s = S.settings;
+  $("sName").value = s.studioName || ""; $("sWhats").value = s.whatsapp || "";
+  $("sStart").value = s.startTime; $("sEnd").value = s.endTime;
+  $("sStep").value = String(s.slotStep); $("sLead").value = s.leadMinutes; $("sAdv").value = s.maxAdvanceDays;
+  document.querySelectorAll("#workingDays input").forEach((cb) => { cb.checked = s.workingDays.includes(Number(cb.value)); });
+  const opts = []; for (let m = 30; m <= 480; m += 30) opts.push(`<option value="${m}">${fmtDur(m)}</option>`);
+  $("nsDur").innerHTML = opts.join(""); $("nsDur").value = "60";
+  renderManageServices();
+}
+async function saveSettings() {
+  const days = [...document.querySelectorAll("#workingDays input:checked")].map((c) => Number(c.value));
+  if (!days.length) return toast("Marque ao menos um dia", "warning");
+  const start = $("sStart").value, end = $("sEnd").value;
+  if (!start || !end || toMin(end) <= toMin(start)) return toast("Confira o horário de abertura e fechamento", "warning");
+  const name = $("sName").value.trim();
+  if (!name) return toast("Informe o nome do studio", "warning");
+  const data = {
+    studioName: name, whatsapp: digits($("sWhats").value),
+    startTime: start, endTime: end, slotStep: Number($("sStep").value),
+    leadMinutes: Math.max(0, parseInt($("sLead").value) || 0), maxAdvanceDays: Math.min(365, Math.max(1, parseInt($("sAdv").value) || 90)),
+    workingDays: days,
+  };
+  const btn = $("btnSaveSettings"); btnLoad(btn, true); showLoader("Salvando...");
+  try { await fbSet("settings", data); S.settings = { ...DEFAULT_SETTINGS, ...data }; applyBrand(); toast("Configurações salvas!", "success"); }
+  catch (e) { console.error(e); toast("Não foi possível salvar (sem permissão de administradora?)", "error", 6500); }
+  finally { btnLoad(btn, false); hideLoader(); }
+}
+function durOptions(sel) {
+  let o = ""; for (let m = 30; m <= 480; m += 30) o += `<option value="${m}"${m === sel ? " selected" : ""}>${fmtDur(m)}</option>`; return o;
+}
+function renderManageServices() {
+  const c = $("manageServicesList");
+  const entries = Object.entries(S.services);
+  if (!entries.length) { c.innerHTML = '<div class="empty">Nenhum serviço.</div>'; return; }
+  c.innerHTML = entries.map(([key, s]) => `
+    <div class="apt-card" data-key="${esc(key)}">
+      <div class="svc-edit">
+        <input type="text" value="${esc(s.name)}" maxlength="60" data-f="name" aria-label="Nome">
+        <input type="number" value="${Number(s.price)}" min="0" step="0.01" data-f="price" aria-label="Preço">
+        <select data-f="duration" aria-label="Duração">${durOptions(Number(s.duration))}</select>
+      </div>
+      <div class="apt-actions">
+        <button class="btn btn-primary btn-sm" data-save="${esc(key)}">Salvar</button>
+        <button class="btn btn-danger btn-sm" data-remove="${esc(key)}">Remover</button>
+      </div>
+    </div>`).join("");
+  c.querySelectorAll("[data-save]").forEach((b) => b.addEventListener("click", guard(async () => {
+    const row = b.closest(".apt-card"), key = b.dataset.save;
+    const name = row.querySelector('[data-f="name"]').value.trim(), price = parseFloat(row.querySelector('[data-f="price"]').value), duration = Number(row.querySelector('[data-f="duration"]').value);
+    if (!name || isNaN(price) || price < 0) return toast("Nome ou preço inválido", "warning");
+    await saveServices({ ...S.services, [key]: { name, price, duration } }, "Serviço atualizado");
+  })));
+  c.querySelectorAll("[data-remove]").forEach((b) => b.addEventListener("click", guard(async () => {
+    if (!confirm("Remover este serviço? Agendamentos já feitos não são afetados.")) return;
+    const next = { ...S.services }; delete next[b.dataset.remove];
+    await saveServices(next, "Serviço removido");
+  })));
+}
+async function saveServices(next, okMsg) {
+  showLoader("Salvando...");
+  try {
+    await fbSet("services", Object.keys(next).length ? next : null);
+    S.services = Object.keys(next).length ? next : {};
+    toast(okMsg, "success"); renderManageServices();
+  } catch (e) { console.error(e); toast("Não foi possível salvar (sem permissão de administradora?)", "error", 6500); }
+  finally { hideLoader(); }
+}
+async function addService() {
+  const name = $("nsName").value.trim(), price = parseFloat($("nsPrice").value), duration = Number($("nsDur").value);
+  if (!name || isNaN(price) || price < 0) return toast("Preencha nome e preço válidos", "warning");
+  let key = name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40) || "servico";
+  while (S.services[key]) key += "_2";
+  await saveServices({ ...S.services, [key]: { name, price, duration } }, "Serviço adicionado");
+  $("nsName").value = ""; $("nsPrice").value = "";
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EVENTOS E INICIALIZAÇÃO
+══════════════════════════════════════════════════════════════ */
+function bindEvents() {
+  $("tabLogin").addEventListener("click", () => setAuthMode("login"));
+  $("tabRegister").addEventListener("click", () => setAuthMode("register"));
+  $("authForm").addEventListener("submit", guard(submitAuth));
+  $("btnForgot").addEventListener("click", guard(forgotPassword));
+
+  document.querySelectorAll("#payMethodOptions .method-opt").forEach((opt) =>
+    opt.addEventListener("click", () => {
+      document.querySelectorAll("#payMethodOptions .method-opt").forEach((o) => o.classList.remove("selected"));
+      opt.classList.add("selected"); S.selPayMethod = opt.dataset.method;
+    }));
+  $("btnGoPayStep").addEventListener("click", guard(goToPayStep));
+  $("btnCancelPayment").addEventListener("click", guard(cancelPaymentScreen));
+  $("btnCheckPix").addEventListener("click", () => checkPixPaid(true));
+  $("btnCancelPix").addEventListener("click", guard(cancelPaymentScreen));
+  $("btnCopyPixCode").addEventListener("click", copyPixCode);
+
+  document.querySelectorAll("#clientScreen .tab").forEach((t) => t.addEventListener("click", () => showClientTab(t.dataset.tab, t)));
+  $("btnProceedPayment").addEventListener("click", proceedToPayment);
+
+  document.querySelectorAll("#adminScreen .tab").forEach((t) => t.addEventListener("click", () => showAdminTab(t.dataset.atab, t)));
+  $("adminDaySelect").addEventListener("change", loadDaily);
+  $("btnAdminPrev").addEventListener("click", () => { S.adminMonth.m--; if (S.adminMonth.m < 0) { S.adminMonth.m = 11; S.adminMonth.y--; } loadMonthly(); });
+  $("btnAdminNext").addEventListener("click", () => { S.adminMonth.m++; if (S.adminMonth.m > 11) { S.adminMonth.m = 0; S.adminMonth.y++; } loadMonthly(); });
+  $("btnAdminBook").addEventListener("click", guard(adminBook));
+  $("btnSaveSettings").addEventListener("click", guard(saveSettings));
+  $("btnAddService").addEventListener("click", guard(addService));
+
+  clientPicker = makePicker({ cal: "calendar", label: "currentMonth", prev: "btnPrevMonth", next: "btnNextMonth", slotsSec: "timeSlotsSection", slots: "timeSlots" },
+    () => (S.services[S.selService] ? Number(S.services[S.selService].duration) : 0), false);
+  adminPicker = makePicker({ cal: "aCalendar", label: "aMonth", prev: "aPrev", next: "aNext", slotsSec: "aSlotsSection", slots: "aSlots" },
+    () => (S.services[adminSel] ? Number(S.services[adminSel].duration) : 0), true);
+}
+
+async function init() {
+  if (!configured) { showScreen("setupScreen"); return; }
+  bindEvents();
+  setAuthMode("login");
+  await loadConfigData().catch(() => {});
+
+  onAuthStateChanged(auth, async (user) => {
+    if (S.registering) return;           // o cadastro termina o roteamento sozinho
+    if (!user) {
+      S.user = S.profile = null; S.isAdmin = false; updateUserInfo();
+      const qs = new URLSearchParams(location.search);
+      if (qs.get("apt")) { history.replaceState(null, "", location.pathname); toast("Faça login para ver seu agendamento", "info"); }
+      showScreen("loginScreen");
+      return;
+    }
+    await routeAfterLogin(user);
+  });
+}
+init();
+</script>
+</body>
+</html>
